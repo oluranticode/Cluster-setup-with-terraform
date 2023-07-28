@@ -1,0 +1,26 @@
+name: APP_NAME
+project: dev
+namespace: NAME_SPACE
+values: |-
+  fullnameOverride: APP_NAME
+  image:
+    repository: 454617234462.dkr.ecr.us-east-1.amazonaws.com/access-bank-account-pay-api:development-319xxx668
+  namespace: NAME_SPACE
+  containerPort: APP_PORT
+  resources:
+    requests:
+      memory: 500Mi
+      cpu: 0.5
+    limits:
+      memory: 2Gi
+      cpu: 1
+  autoscaling:
+    enabled: true
+  ingress:
+    host: APP_NAME
+  env:
+    enabled: true 
+  lProbe:
+    enabled: false
+  rProbe:
+    enabled: false

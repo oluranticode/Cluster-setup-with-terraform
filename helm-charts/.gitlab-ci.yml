@@ -1,0 +1,60 @@
+default:
+  image: glyhood/ci-image:latest
+  tags:
+    - ekscluster
+
+variables:
+  helm_registry_name: temzy-helm-registry
+
+stages:
+  - test
+  - release
+
+.helm_registry_login: &helm_registry_login
+  - helm plugin install https://github.com/chartmuseum/helm-push
+  - helm repo add --username ${GIT_USER} --password ${GIT_TOKEN} temzy-helm-registry https://gitlab.com/api/v4/projects/47191518/packages/helm/stable
+
+test_dev-charts:
+  stage: test
+  script:
+    - echo "Rendering test template"
+    - helm template -f test_values.yaml dev-charts
+  only:
+    changes:
+      - /dev-charts/*
+
+test_prod-charts:
+  stage: test
+  script:
+    - echo "Rendering test template"
+    - helm template -f test_values.yaml prod-charts
+  only:
+    changes:
+      - /prod-charts/*
+
+# The use of tags can be explored in the future
+
+release_dev:
+  stage: release
+#  only: [tags]
+  script:
+    - *helm_registry_login
+    - PACKAGE=`helm package dev-charts | cut -d ":" -f 2`
+    - helm cm-push ${PACKAGE} ${helm_registry_name}
+  only:
+    changes:
+      - /dev-charts/*
+
+release_prod:
+  stage: release
+#  only: [tags]
+  script:
+    - *helm_registry_login
+    - PACKAGE=`helm package prod-charts | cut -d ":" -f 2`
+    - helm cm-push ${PACKAGE} ${helm_registry_name}
+  only:
+    changes:
+      - /prod-charts/*
+
+
+

@@ -1,0 +1,26 @@
+name: investment-api-dev
+project: dev
+namespace: devns
+values: |-
+  fullnameOverride: investment-api-dev
+  image:
+    repository: 454617234462.dkr.ecr.us-east-1.amazonaws.com/investment-api:development-4521460080
+  namespace: devns
+  containerPort: 3000
+  resources:
+    requests:
+      memory: 500Mi
+      cpu: 0.5
+    limits:
+      memory: 2Gi
+      cpu: 1
+  autoscaling:
+    enabled: true
+  ingress:
+    host: investment-api-dev
+  env:
+    enabled: true 
+  lProbe:
+    enabled: false
+  rProbe:
+    enabled: false

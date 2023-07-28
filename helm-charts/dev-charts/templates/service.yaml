@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.fullnameOverride }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.fullnameOverride}}
+spec:
+  ports:
+    - name: http
+      targetPort: {{ .Values.containerPort }}
+  {{- $service := .Values.service | default dict }}
+  {{- if $service }}
+      port: {{ $service.port | default 80 }}
+  type: {{ $service.type | default "ClusterIP" | quote }}
+  {{- else }}
+      port: 80
+  type: ClusterIP
+  {{- end }}
+  selector:
+    app: {{ .Values.fullnameOverride}}

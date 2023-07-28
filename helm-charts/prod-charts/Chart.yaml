@@ -1,0 +1,4 @@
+apiVersion: v2
+name: prod-chart
+version: 0.1.0
+description: prod chart

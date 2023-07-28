@@ -1,0 +1,69 @@
+global:
+  image:
+    tag: "v2.5.8"
+
+dex:
+  extraArgs:
+   - --disable-tls
+
+configs:
+  cm:
+    exec.enabled: true
+    url: https://argocd.f4b-stores-digital-product.com
+    resource.customizations: |
+      networking.k8s.io/Ingress:
+        health.lua: |
+          hs = {}
+          hs.status = "Healthy"
+          return hs
+
+  # secret:
+  #   extra:
+  #     oidc.jumpcloud.clientSecret: ${jumpcloud_clientsecret}
+    
+  rbac:
+    policy.default: 'role:readonly'
+    policy.csv: |
+      p, role:admin, exec, create, */*, allow
+
+  repositories:
+    helm-charts:  
+      url: https://gitlab.com/api/v4/projects/47191518/packages/helm/stable
+      name: helm-charts
+      type: helm
+      password: glpat-uThssnp_M_zTdN62bGUh
+      username: glpat-uThssnp_M_zTdN62bGUh
+
+    argocd-manifest:
+      url: https://gitlab.com/devops2053126/argocd-manifest.git  
+      name: argocd-manifest
+      type: git
+      password: Melanin$96
+      username: Temzycode
+
+redis-ha:
+  enabled: false
+
+controller:
+  replicas: 1
+
+server:
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - argocd.f4b-stores-digital-product.com
+    https: true
+  extraArgs:
+    - --insecure
+
+repoServer:
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+
+applicationSet:
+  replicaCount: 2

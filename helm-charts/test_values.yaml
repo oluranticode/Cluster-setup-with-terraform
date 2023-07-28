@@ -1,0 +1,21 @@
+fullnameOverride: test-chart
+image:
+    repository: nginx:latest
+namespace: default
+containerPort: 3001
+autoscaling:
+    enabled: true
+ingress:
+    host: test-chart
+env:
+    enabled: true
+envFrom: 
+- secretRef:
+    name: java-opts
+JavaOpts:
+    enabled: true
+lProbe:
+    enabled: false
+rProbe:
+    enabled: false
+

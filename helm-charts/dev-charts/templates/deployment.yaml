@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fullnameOverride}}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+  labels:
+    {{- $apm := .Values.apm | default dict }}
+    {{- if $apm.enabled }}
+    tags.datadoghq.com/env: "production"
+    tags.datadoghq.com/service: {{ .Values.fullnameOverride }}
+    tags.datadoghq.com/version: "current-release"
+    {{- else if or $apm.disabled (not (hasKey $apm "disabled")) }}
+    {{- end }}
+spec:
+  selector:
+   matchLabels:
+    app: {{ .Values.fullnameOverride }}
+  replicas: {{ .Values.replicaCount | default 1 }}
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  minReadySeconds: 60
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fullnameOverride }}
+        {{- if $apm.enabled }}
+        tags.datadoghq.com/env: "production"
+        tags.datadoghq.com/service: {{ .Values.fullnameOverride}}
+        tags.datadoghq.com/version: "current-release"
+        {{- else if or $apm.disabled (not (hasKey $apm "disabled")) }}
+        {{- end }}
+    spec:
+      containers:
+      - name: {{ .Values.fullnameOverride }}
+        image: {{ .Values.image.repository }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: {{ .Values.containerPort}}
+          name: http
+          protocol: TCP
+        env:
+        {{- if or $apm.enabled }}
+        - name: DD_ENV
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/env']
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
+        - name: DD_VERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/version']
+        - name: DD_PROFILING_ENABLED
+          value: "true"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        {{- else if or $apm.disabled (not (hasKey $apm "disabled")) }}
+        {{- end }}
+        {{- if .Values.env.enabled }}
+        {{- with .Values.envFrom}}
+        envFrom:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- $JavaOpts := default .Values.JavaOpts | default dict }}
+        {{- if $JavaOpts.enabled }}
+          - secretRef:
+              name: java-opts
+        {{- else if or $JavaOpts.disabled (not (hasKey $JavaOpts "disabled")) }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.lProbe.enabled }} #If enabled=true in the values.yaml, declare the probe parameters in the values.yaml
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.rProbe.enabled }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        resources:
+        {{- $resources := .Values.resources | default dict }}
+        {{- if $resources }}
+          requests:
+            cpu: {{ $resources.requests.cpu | default "0.2" | quote}}
+            memory: {{ $resources.requests.memory | default "500Mi" | quote}} 
+          limits:
+            cpu: {{ $resources.limits.cpu | default "0.5" | quote}}
+            memory: {{ $resources.limits.memory | default "1Gi" | quote}}
+        {{- else }}
+          requests:
+            cpu: 0.2
+            memory: 500Mi
+          limits:
+            cpu: 0.5
+            memory: 1Gi
+        {{- end }}

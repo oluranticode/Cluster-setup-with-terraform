@@ -1,0 +1,30 @@
+name: sample-app
+project: dev
+namespace: sample
+values: |-
+  fullnameOverride: sample-app
+  image:
+    repository: nginx:latest
+  namespace: sample
+  containerPort: 80
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    targetCPUUtilizationPercentage: 70
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 0.5
+    limits:
+      memory: 2Gi
+      cpu: 0.5
+  ingress:
+    host: sample-prod
+  apm:
+    enabled: false
+  env:
+    enabled: false
+  lProbe:
+    enabled: false
+  rProbe:
+    enabled: false
