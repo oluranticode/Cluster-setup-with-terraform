@@ -12,7 +12,7 @@ stages:
 
 .helm_registry_login: &helm_registry_login
   - helm plugin install https://github.com/chartmuseum/helm-push
-  - helm repo add --username ${GIT_USER} --password ${GIT_TOKEN} temzy-helm-registry https://gitlab.com/api/v4/projects/47191518/packages/helm/stable
+  - helm repo add --username ${GIT_USER} --password ${GIT_} temzy-helm-registry https://gitlab.com/api/v4/projects/47191518/packages/helm/stable
 
 test_dev-charts:
   stage: test
