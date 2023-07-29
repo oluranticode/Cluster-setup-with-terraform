@@ -31,8 +31,8 @@ configs:
       url: https://gitlab.com/api/v4/projects/47191518/packages/helm/stable
       name: helm-charts
       type: helm
-      password: glpat-uThssnp_M_zTdN62bGUh
-      username: glpat-uThssnp_M_zTdN62bGUh
+      password: <the gitlab group token>
+      username: <the gitlab group token>
 
     argocd-manifest:
       url: https://gitlab.com/devops2053126/argocd-manifest.git  
